@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+
+        <script type="text/javascript">
+            
+            
+            
+            var Context = {
+                canvas : null,
+                context : null,
+                font: "50px Georgia",
+                create: function(canvas_tag_id) {
+                    this.canvas = document.getElementById(canvas_tag_id);
+                    this.context = this.canvas.getContext('2d');
+                    this.context.font = this.font;
+                    return this.context;
+                }
+            };
+
+            var Sprite = function(filename, is_pattern) {
+
+                // Construct
+                this.image = null;
+                this.pattern = null;
+                this.TO_RADIANS = Math.PI/180;
+
+
+                if (filename != undefined && filename != "" && filename != null)
+                {
+                    this.image = new Image();
+                    this.image.src = filename;
+                    //this.image.onload = function(e) {
+                        //window.window.alert(filename); 
+                    //}
+
+                    //if (is_pattern)
+                        //this.pattern = Context.context.createPattern(this.image, "repeat");
+                    //window.alert("Here1");
+                }
+                else
+                    window.alert("Unable to load sprite.");
+
+                this.draw = function(x, y, w, h)
+                {
+                    // Pattern?
+                    if (this.pattern)
+                    {
+                        //console.log("pattern!");
+                        Context.context.fillStyle = this.pattern;
+                        Context.context.fillRect(x, y, w, h);
+                    } 
+                    else 
+                    {
+                        // Image
+                        if (!w)
+                        {
+                           Context.context.drawImage(this.image, x, y, this.image.width, this.image.height);
+                        } 
+                        else 
+                        {
+                            // Stretched
+                            Context.context.drawImage(this.image, x, y, w, h);
+
+                        }            
+                    }
+                };
+
+                this.rotate = function(x, y, angle)
+                {
+                    Context.context.save();
+
+                    Context.context.translate(x, y);
+                    Context.context.rotate(angle * this.TO_RADIANS);
+
+                    Context.context.drawImage(this.image, -(this.image.width/2), -(this.image.height/2));
+
+                    Context.context.restore();
+                };
+
+                this.DrawFillText = function(text, x, y, FONT, COLOR)
+                {
+                    var LastFont = Context.context.font;
+                    if(FONT != null)
+                    {
+                        Context.context.font = FONT;
+                    }
+                    if(COLOR != null)
+                        Context.context.fillStyle = COLOR;
+                    else
+                        Context.context.fillStyle = "white";
+                    Context.context.fillText(text, x, y);
+
+                    Context.context.font = LastFont;
+                };
+
+                this.WrapText = function(text, x, y, maxWidth, lineHeight, FONT, COLOR) 
+                {
+                    var cars = text.split("\n");
+                    var LastFont = Context.context.font;
+                    if(FONT != null)
+                    {
+                        Context.context.font = FONT;
+                    }
+                    if(COLOR != null)
+                        Context.context.fillStyle = COLOR;
+                    else
+                        Context.context.fillStyle = "white";
+
+
+                    for (var ii = 0; ii < cars.length; ++ii) 
+                    {
+                        var line = "";
+                        var words = cars[ii].split(" ");
+
+                        for (var n = 0; n < words.length; n++) 
+                        {
+                            var testLine = line + words[n] + " ";
+                            var metrics = Context.context.measureText(testLine);
+                            var testWidth = metrics.width;
+
+                            if (testWidth > maxWidth) 
+                            {
+                                Context.context.fillText(line, x, y);
+                                line = words[n] + " ";
+                                y += lineHeight;
+                            }
+                            else 
+                            {
+                                line = testLine;
+                            }
+                        }
+
+                        Context.context.fillText(line, x, y);
+                        y += lineHeight;
+                    }
+                    Context.context.font = LastFont;
+
+                    return cars.length - 1;
+                };
+
+
+
+            };
+
+            
+
+            var ImageRoleta0 = new Sprite("./p0.png", false);
+            var ImageRoleta1 = new Sprite("./p1.png", false);
+            var ImageRoleta2 = new Sprite("./p2.png", false);
+            var ImageRoleta3 = new Sprite("./p3.png", false);
+            var ImageRoleta4 = new Sprite("./p4.png", false);
+            
+            var ImageArrow = new Sprite("./arrow.png", false);
+            
+            
+            
+            var defaultAngle = 360 - 105;
+            var Angle0 = 360 - 105, Angle1 = 360 - 105, Angle2 = 360 - 105, Angle3 = 360 - 105, Angle4 = 360 - 105;
+
+            
+            
+            var ValueInput;
+            
+            var WheelPos0 = 0;
+            var WheelPos1 = 0;
+            var WheelPos2 = 0;
+            var WheelPos3 = 0;
+            var WheelPos4 = 0;
+            
+            var WheelPosMax = 11;
+            var WheelPosJump = 9;
+            
+            var toleranceValues = [20, 10, 5, 2, 1, 0.5, 0.25, 0.1, 0.05];
+
+            function Load()
+            {
+                //alert("HEHE"); 
+                Context.create("canvas");
+                ValueInput = document.getElementById('valueInput');
+                
+                ImageRoleta0.rotate(300, 300, Angle0);
+                
+                ImageRoleta1.rotate(300, 300, Angle1);
+
+                ImageRoleta2.rotate(300, 300, Angle2);
+
+                ImageRoleta3.rotate(300, 300, Angle3);
+                
+                ImageRoleta4.rotate(300, 300, Angle4);
+                
+                Context.canvas.addEventListener('click', function(event) {
+                    var x = event.pageX;
+                    var y = event.pageY;
+
+                    // Collision detection between clicked offset and element.
+                    console.log("X = " + x + "; Y = " + y);
+                    //alert('clicked an element');
+                    //X = 226; Y = 289
+                    //X = 245; Y = 320
+                    if((x >= 226 && x <= 245) && (y >= 289 && y <= 320))
+                    {
+                        
+                        Angle0 -= 30;
+                        
+                        ++WheelPos0;
+                        if(WheelPos0 > WheelPosJump)
+                        {
+                            WheelPos0 = 0;
+                            Angle0 -= 30 * 2;
+                        }
+                            
+                        
+                        console.log("Ring 0; pos = " + WheelPos0);
+                    }
+                    //X = 263; Y = 293
+                    //X = 281; Y = 320
+                    if((x >= 263 && x <= 281) && (y >= 293 && y <= 320))
+                    {
+                        Angle1 -= 30;
+                        
+                        ++WheelPos1;
+                        if(WheelPos1 > WheelPosJump)
+                        {
+                            WheelPos1 = 0;
+                            Angle1 -= 30 * 2;
+                        }
+                        
+                        console.log("Ring 1; pos = " + WheelPos1);
+                    }
+                    
+                    //X = 299; Y = 291
+                    //X = 319; Y = 321
+                    if((x >= 299 && x <= 319) && (y >= 291 && y <= 320))
+                    {
+                        Angle2 -= 30;
+                        
+                        ++WheelPos2;
+                        if(WheelPos2 > WheelPosJump)
+                        {
+                            WheelPos2 = 0;
+                            Angle2 -= 30 * 2;
+                        }
+                        
+                        console.log("Ring 2; pos = " + WheelPos2);
+                    }
+                    
+                    //X = 335; Y = 291
+                    //X = 364; Y = 322
+                    if((x >= 335 && x <= 364) && (y >= 291 && y <= 320))
+                    {
+                        Angle3 -= 30;
+                        
+                        ++WheelPos3;
+                        if(WheelPos3 > WheelPosJump)
+                        {
+                            WheelPos3 = 0;
+                            Angle3 -= 30 * 2;
+                        }
+                        
+                        console.log("Ring 3; pos = " + WheelPos3);
+                    }
+                    
+                    //X = 372; Y = 290
+                    //X = 404; Y = 315
+                    if((x >= 372 && x <= 404) && (y >= 290 && y <= 315))
+                    {
+                        Angle4 -= 30;
+                        
+                        ++WheelPos4;
+                        if(WheelPos4 > WheelPosJump - 1)
+                        {
+                            WheelPos4 = 0;
+                            Angle4 -= 30 * 3;
+                        }
+                        
+                        console.log("Ring 4; pos = " + WheelPos4);
+                    }
+                    
+                    ////////////////////////////////////////////
+                    
+                    var multiFactor = Math.pow(10, WheelPos3);
+                    if(WheelPos3 > 7)
+                        multiFactor = Math.pow(10, - (WheelPos3 - 7));
+                    
+                    var resistorValue = (WheelPos0 * 10 + WheelPos1) * multiFactor;
+                    if(WheelPos2 > 0)
+                        resistorValue = (WheelPos0 * 100 + WheelPos1 * 10 + WheelPos2) * multiFactor;
+                    
+                    var valueString = "";
+                    
+                    if(resistorValue >= 1000000)
+                        valueString = (resistorValue / 1000000) + " MΩ";
+                    else if(resistorValue >= 1000)
+                        valueString = (resistorValue / 1000) + " KΩ";
+                    else
+                        valueString = resistorValue + " Ω";
+                    
+                    ValueInput.value = valueString + " " + decodeURI('%C2%B1') + " " + toleranceValues[WheelPos4] + "%";
+
+                }, false);
+                
+                //////////////////////////////
+                
+                ValueInput.addEventListener("change", function(event) {
+                    console.log(ValueInput.value);
+                });
+                
+                
+                ImageArrow.draw(10, 275, 50, 50);
+                
+                setInterval(function() {
+                    /*
+                    Angle0 += 30;
+                    if(Angle0 % 45 == 0)
+                    {
+                        Angle1 += 30;
+                        if(Angle1 % 45 == 0)
+                        {
+                            Angle2 += 30;
+                            if(Angle2 % 45 == 0)
+                            {
+                                Angle3 += 30;
+                            }
+                        }
+                    }
+                    */
+                    
+                    //console.log(Angle0);
+                    
+                    ImageRoleta0.rotate(300, 300, Angle0);
+                
+                    ImageRoleta1.rotate(300, 300, Angle1);
+
+                    ImageRoleta2.rotate(300, 300, Angle2);
+
+                    ImageRoleta3.rotate(300, 300, Angle3);
+                    
+                    ImageRoleta4.rotate(300, 300, Angle4);
+                },100);
+            }
+        </script>
+    </head>
+
+    <body onload="javascript:Load()">
+        
+        <canvas id = 'canvas' width = '1024' height = '600' style = 'border: 0; margin-left:150px; margin-top:0px;' ></canvas>
+        
+        <input type="text" id="valueInput" style="position:absolute;left:300px;top:570px;width:300px;font:20px Georgia;display:block;background-color: transparent;color:black" placeholder="value" />
+        <!---
+        <img src="./p0.png" style="position: absolute;left:300px;top:35px;margin-top:0px"/>
+        <img src="./p1.png" style="position: absolute;left:337px;top:72px;margin-top:0px"/>
+        <img src="./p2.png" style="position: absolute;left:372px;top:108px;margin-top:0px"/>
+        <img src="./p3.png" style="position: absolute;left:409px;top:144px;margin-top:0px"/>
+        -->
+    </body>
+</html>
