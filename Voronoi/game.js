@@ -19,7 +19,7 @@ var Context = {
 var Y_MAX = 600;
 var X_MAX = 1020;
 
-var dotSize = 3;
+var dotSize = 2;
 //-------------------------------------------------------------------------
 var VoronoiPoints = [];
 var regionColors;
@@ -55,7 +55,7 @@ function DoVoronoiMath()
       for(var index = 0; index < VoronoiPoints.length; ++index)
       {
         //here you can change to cartesian distance if you want
-        var _d = ManhatamDistance({x: i, y: j}, VoronoiPoints[index]);
+        var _d = CartesianDistance({x: i, y: j}, VoronoiPoints[index]);
         if(smallerD == -1 || _d < smallerD)
         {
           smallerD = _d;
@@ -71,7 +71,7 @@ function DoVoronoiMath()
   for(var i = 0; i < VoronoiPoints.length; ++i)
   {
     Context.context.fillStyle = "#fff";
-    Context.context.fillRect(VoronoiPoints[i].x, VoronoiPoints[i].y, dotSize * 2, dotSize * 2);
+    Context.context.fillRect(VoronoiPoints[i].x, VoronoiPoints[i].y, dotSize, dotSize);
   }
 }
 
@@ -104,7 +104,7 @@ $(document).ready(function()
     X_MAX = Context.canvas.width;
     Y_MAX = Context.canvas.height;
 
-    var rnd = RandomNumber(50, 100);
+    var rnd = RandomNumber(800, 1200);
     for(var j = 0; j < rnd; ++j)
     {
       var _x = RandomNumber(0, X_MAX);
